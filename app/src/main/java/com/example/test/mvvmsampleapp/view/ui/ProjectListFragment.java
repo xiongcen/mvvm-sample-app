@@ -4,10 +4,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.example.test.mvvmsampleapp.R;
-import com.example.test.mvvmsampleapp.databinding.FragmentProjectListBinding;
-import com.example.test.mvvmsampleapp.di.Injectable;
 import com.example.test.mvvmsampleapp.service.model.Project;
 import com.example.test.mvvmsampleapp.view.adapter.ProjectAdapter;
 import com.example.test.mvvmsampleapp.view.callback.ProjectClickCallback;
@@ -15,43 +15,38 @@ import com.example.test.mvvmsampleapp.viewmodel.ProjectListViewModel;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import androidx.annotation.Nullable;
-import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.RecyclerView;
 
-public class ProjectListFragment extends Fragment implements Injectable {
+public class ProjectListFragment extends Fragment {
     public static final String TAG = "ProjectListFragment";
+    private TextView mTextView;
+    private LinearLayout mContainer;
+    private RecyclerView mRecyclerView;
     private ProjectAdapter projectAdapter;
-    private FragmentProjectListBinding binding;
-
-    @Inject
-    ViewModelProvider.Factory viewModelFactory;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_project_list, container, false);
-
+        View view = inflater.inflate(R.layout.fragment_project_list, null);
+        mTextView = view.findViewById(R.id.loading_projects);
+        mContainer = view.findViewById(R.id.container);
+        mRecyclerView = view.findViewById(R.id.project_list);
         projectAdapter = new ProjectAdapter(projectClickCallback);
-        binding.projectList.setAdapter(projectAdapter);
-        binding.setIsLoading(true);
-
-        return (View) binding.getRoot();
+        mRecyclerView.setAdapter(projectAdapter);
+        return view;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        final ProjectListViewModel viewModel = ViewModelProviders.of(this,
-                viewModelFactory).get(ProjectListViewModel.class);
+        final ProjectListViewModel viewModel = ViewModelProviders.of(this).get(ProjectListViewModel.class);
 
         observeViewModel(viewModel);
     }
@@ -62,7 +57,8 @@ public class ProjectListFragment extends Fragment implements Injectable {
             @Override
             public void onChanged(@Nullable List<Project> projects) {
                 if (projects != null) {
-                    binding.setIsLoading(false);
+                    mTextView.setVisibility(View.GONE);
+                    mContainer.setVisibility(View.VISIBLE);
                     projectAdapter.setProjectList(projects);
                 }
             }

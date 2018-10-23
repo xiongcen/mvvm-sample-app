@@ -1,26 +1,34 @@
 package com.example.test.mvvmsampleapp.service.repository;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-
 import com.example.test.mvvmsampleapp.service.model.Project;
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-@Singleton
 public class ProjectRepository {
+
+    private volatile static ProjectRepository mInstance;
     private GitHubService gitHubService;
 
-    @Inject
-    public ProjectRepository(GitHubService gitHubService) {
+    private ProjectRepository(GitHubService gitHubService) {
         this.gitHubService = gitHubService;
+    }
+
+    public static ProjectRepository getInstance(GitHubService gitHubService) {
+        if (null == mInstance) {
+            synchronized (ProjectRepository.class) {
+                if (null == mInstance) {
+                    mInstance = new ProjectRepository(gitHubService);
+                }
+            }
+        }
+
+        return mInstance;
     }
 
     public LiveData<List<Project>> getProjectList(String userId) {

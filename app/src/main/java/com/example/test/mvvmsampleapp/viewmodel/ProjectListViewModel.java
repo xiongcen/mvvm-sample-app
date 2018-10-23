@@ -1,26 +1,30 @@
 package com.example.test.mvvmsampleapp.viewmodel;
 
 import android.app.Application;
-import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
-import androidx.annotation.NonNull;
 
 import com.example.test.mvvmsampleapp.service.model.Project;
+import com.example.test.mvvmsampleapp.service.repository.GitHubService;
 import com.example.test.mvvmsampleapp.service.repository.ProjectRepository;
 
 import java.util.List;
 
-import javax.inject.Inject;
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ProjectListViewModel extends AndroidViewModel {
     private final LiveData<List<Project>> projectListObservable;
 
-    @Inject
-    public ProjectListViewModel(@NonNull ProjectRepository projectRepository, @NonNull Application application) {
+    public ProjectListViewModel(@NonNull Application application) {
         super(application);
 
-        // If any transformation is needed, this can be simply done by Transformations class ...
-        projectListObservable = projectRepository.getProjectList("Google");
+        GitHubService gitHubService = new Retrofit.Builder().baseUrl(GitHubService.HTTPS_API_GITHUB_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(GitHubService.class);
+        projectListObservable = ProjectRepository.getInstance(gitHubService).getProjectList("Google");
     }
 
     /**

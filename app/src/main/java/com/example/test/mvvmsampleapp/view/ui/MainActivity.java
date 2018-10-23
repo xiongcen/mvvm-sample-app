@@ -5,18 +5,10 @@ import android.os.Bundle;
 import com.example.test.mvvmsampleapp.R;
 import com.example.test.mvvmsampleapp.service.model.Project;
 
-import javax.inject.Inject;
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import dagger.android.DispatchingAndroidInjector;
-import dagger.android.support.HasSupportFragmentInjector;
 
-public class MainActivity extends AppCompatActivity implements HasSupportFragmentInjector {
-
-    @Inject
-    DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
+public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,8 +35,4 @@ public class MainActivity extends AppCompatActivity implements HasSupportFragmen
                         projectFragment, null).commit();
     }
 
-    @Override
-    public DispatchingAndroidInjector<Fragment> supportFragmentInjector() {
-        return dispatchingAndroidInjector;
-    }
 }

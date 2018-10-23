@@ -4,9 +4,8 @@ import android.app.Application;
 import android.util.Log;
 
 import com.example.test.mvvmsampleapp.service.model.Project;
+import com.example.test.mvvmsampleapp.service.repository.GitHubService;
 import com.example.test.mvvmsampleapp.service.repository.ProjectRepository;
-
-import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.ObservableField;
@@ -14,6 +13,8 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ProjectViewModel extends AndroidViewModel {
     private static final String TAG = ProjectViewModel.class.getName();
@@ -28,8 +29,7 @@ public class ProjectViewModel extends AndroidViewModel {
 
     public ObservableField<Project> project = new ObservableField<>();
 
-    @Inject
-    public ProjectViewModel(@NonNull ProjectRepository projectRepository, @NonNull Application application) {
+    public ProjectViewModel(@NonNull Application application) {
         super(application);
 
         this.projectID = new MutableLiveData<>();
@@ -41,8 +41,11 @@ public class ProjectViewModel extends AndroidViewModel {
             }
 
             Log.i(TAG,"ProjectViewModel projectID is " + projectID.getValue());
-
-            return projectRepository.getProjectDetails("Google", projectID.getValue());
+            GitHubService gitHubService = new Retrofit.Builder().baseUrl(GitHubService.HTTPS_API_GITHUB_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build()
+                    .create(GitHubService.class);
+            return ProjectRepository.getInstance(gitHubService).getProjectDetails("Google", projectID.getValue());
         });
     }
 

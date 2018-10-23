@@ -4,52 +4,57 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.example.test.mvvmsampleapp.R;
-import com.example.test.mvvmsampleapp.databinding.FragmentProjectDetailsBinding;
-import com.example.test.mvvmsampleapp.di.Injectable;
 import com.example.test.mvvmsampleapp.service.model.Project;
 import com.example.test.mvvmsampleapp.viewmodel.ProjectViewModel;
 
-import javax.inject.Inject;
-
 import androidx.annotation.Nullable;
-import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
-
-public class ProjectFragment extends Fragment implements Injectable {
+public class ProjectFragment extends Fragment {
     private static final String KEY_PROJECT_ID = "project_id";
-    private FragmentProjectDetailsBinding binding;
-
-    @Inject
-    ViewModelProvider.Factory viewModelFactory;
+    private TextView mTextView;
+    private LinearLayout mContainer;
+    private TextView mName;
+    private TextView mProjectDesc;
+    private TextView mLanguages;
+    private TextView mProjectWatchers;
+    private TextView mProjectOpenIssues;
+    private TextView mProjectCreatedAt;
+    private TextView mProjectUpdatedAt;
+    private TextView mCloneUrl;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
-        // Inflate this data binding layout
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_project_details, container, false);
-
-        // Create and set the adapter for the RecyclerView.
-        return (View) binding.getRoot();
+        View view = inflater.inflate(R.layout.fragment_project_details, null);
+        mTextView = view.findViewById(R.id.loading_project);
+        mContainer = view.findViewById(R.id.container);
+        mName = view.findViewById(R.id.name);
+        mProjectDesc = view.findViewById(R.id.project_desc);
+        mLanguages = view.findViewById(R.id.languages);
+        mProjectWatchers = view.findViewById(R.id.project_watchers);
+        mProjectOpenIssues = view.findViewById(R.id.project_open_issues);
+        mProjectCreatedAt = view.findViewById(R.id.project_created_at);
+        mProjectUpdatedAt = view.findViewById(R.id.project_updated_at);
+        mCloneUrl = view.findViewById(R.id.clone_url);
+        return view;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        final ProjectViewModel viewModel = ViewModelProviders.of(this, viewModelFactory)
+        final ProjectViewModel viewModel = ViewModelProviders.of(this)
                 .get(ProjectViewModel.class);
 
         viewModel.setProjectID(getArguments().getString(KEY_PROJECT_ID));
-
-        binding.setProjectViewModel(viewModel);
-        binding.setIsLoading(true);
 
         observeViewModel(viewModel);
     }
@@ -60,8 +65,16 @@ public class ProjectFragment extends Fragment implements Injectable {
             @Override
             public void onChanged(@Nullable Project project) {
                 if (project != null) {
-                    binding.setIsLoading(false);
-                    viewModel.setProject(project);
+                    mTextView.setVisibility(View.GONE);
+                    mContainer.setVisibility(View.VISIBLE);
+                    mName.setText(project.name);
+                    mProjectDesc.setText(project.description);
+                    mLanguages.setText(String.format(getString(R.string.languages), project.language));
+                    mProjectWatchers.setText(String.format(getString(R.string.watchers), project.watchers));
+                    mProjectOpenIssues.setText(String.format(getString(R.string.openIssues), project.open_issues));
+                    mProjectCreatedAt.setText(String.format(getString(R.string.created_at), project.created_at));
+                    mProjectUpdatedAt.setText(String.format(getString(R.string.updated_at), project.updated_at));
+                    mCloneUrl.setText(String.format(getString(R.string.clone_url), project.clone_url));
                 }
             }
         });
